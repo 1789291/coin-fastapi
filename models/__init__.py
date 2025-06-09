@@ -1,9 +1,14 @@
 from sqlmodel import SQLModel, Relationship, Field, create_engine
 from pydantic import EmailStr
-from typing import Optional, List  # Added List import
+from typing import Literal, Optional, List
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from datetime import datetime
 from enum import Enum
+
+
+class UserRole(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
 class User(SQLModel, table=True):
@@ -15,7 +20,7 @@ class User(SQLModel, table=True):
     cell: PhoneNumber
     password_hash: str
     coin_balance: Optional[float] = None
-    role: Optional[str] = Field(default="user")
+    role: UserRole = Field(default=UserRole.USER)
 
     # Relationships
     bank_account: Optional["BankAccount"] = Relationship(back_populates="owner")
@@ -44,11 +49,9 @@ class User(SQLModel, table=True):
 
 class BankAccount(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(max_length=20)
-    number: int
-    branch_code: int = Field(
-        ge=0, le=99999
-    )  # Fixed: ge (>=) and le (<=) instead of lt/gt
+    name: str = Field(max_length=50)
+    number: int = Field(ge=0, le=999999)
+    branch_code: int = Field(ge=0, le=999999)
 
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     owner: Optional[User] = Relationship(back_populates="bank_account")
@@ -71,14 +74,14 @@ class Referral(SQLModel, table=True):
 
 
 class AuctionStatus(Enum):
-    UPCOMING = "UPCOMING"  # Fixed: spelling and consistency
+    UPCOMING = "UPCOMING"
     STARTED = "STARTED"
     ENDED = "ENDED"
 
 
 class Auction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    start_time: datetime  # Added space for consistency
+    start_time: datetime
     end_time: datetime
     status: AuctionStatus = Field(default=AuctionStatus.UPCOMING)
 

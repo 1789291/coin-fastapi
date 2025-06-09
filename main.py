@@ -4,13 +4,20 @@ from fastapi.security import OAuth2PasswordRequestForm
 from auth.schemas import Token
 from database.session import SessionDep
 from models import create_db_and_tables
-from routers import auth, users
+from routers import auth, users,transactions, bank_accounts, listings, auctions
 
 app = FastAPI(title="Users App")
 
 # Include routers
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(transactions.router)
+app.include_router(bank_accounts.router)
+app.include_router(listings.router)
+app.include_router(auctions.router)
+
+
+
 
 @app.on_event("startup")
 def on_startup():
